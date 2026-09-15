@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Sancho Tech Betting Dashboard</title>
+
+  <meta
+    name="description"
+    content="Sancho Tech Aviator predictor, live football scores, player search and head-to-head football statistics."
+  />
+
+  <style>
+    :root {
+      --black: #050505;
+      --black-soft: #101010;
+      --card: #171717;
+      --card-light: #202020;
+      --yellow: #ffd400;
+      --yellow-dark: #c9a800;
+      --blue: #168cff;
+      --blue-dark: #075bb0;
+      --white: #ffffff;
+      --muted: #a7a7a7;
+      --green: #20d47b;
+      --red: #ff4f5e;
+      --border: rgba(255, 212, 0, 0.22);
+      --shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--white);
+      background:
+        radial-gradient(circle at top right, rgba(22, 140, 255, 0.12), transparent 35%),
+        radial-gradient(circle at top left, rgba(255, 212, 0, 0.08), transparent 30%),
+        var(--black);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 212, 0, 0.08),
+        rgba(22, 140, 255, 0.08)
+      );
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-logo {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      color: var(--black);
+      background: linear-gradient(135deg, var(--yellow), var(--blue));
+      font-size: 25px;
+      font-weight: 900;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(20px, 4vw, 30px);
+      color: var(--yellow);
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status-badge {
+      padding: 9px 13px;
+      border: 1px solid rgba(32, 212, 123, 0.4);
+      border-radius: 999px;
+      background: rgba(32, 212, 123, 0.1);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      min-width: max-content;
+      padding: 12px 17px;
+      border: 1px solid #333;
+      border-radius: 12px;
+      color: var(--muted);
+      background: var(--card);
+      transition: 0.2s ease;
+    }
+
+    .tab:hover {
+      border-color: var(--yellow);
+      color: var(--white);
+    }
+
+    .tab.active {
+      border-color: var(--yellow);
+      color: var(--black);
+      background: var(--yellow);
+      font-weight: 800;
+    }
+
+    .panel {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      min-width: 0;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: linear-gradient(145deg, var(--card), var(--black-soft));
+      box-shadow: var(--shadow);
+    }
+
+    .card.full {
+      grid-column: 1 / -1;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card-title h2,
+    .card-title h3 {
+      margin: 0;
+      color: var(--yellow);
+    }
+
+    .card-title h2 {
+      font-size: 20px;
+    }
+
+    .card-title h3 {
+      font-size: 17px;
+    }
+
+    .card-title small {
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .aviator-stage {
+      position: relative;
+      min-height: 350px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(22, 140, 255, 0.35);
+      border-radius: 18px;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        #090d14;
+      background-size: 35px 35px;
+    }
+
+    .aviator-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at center,
+        rgba(22, 140, 255, 0.14),
+        transparent 55%
+      );
+      pointer-events: none;
+    }
+
+    .aviator-plane {
+      position: absolute;
+      left: 10%;
+      bottom: 22%;
+      z-index: 2;
+      font-size: 46px;
+      filter: drop-shadow(0 0 12px rgba(255, 212, 0, 0.8));
+      animation: planeFloat 2.8s ease-in-out infinite;
+    }
+
+    .aviator-plane::after {
+      content: "";
+      position: absolute;
+      left: -80px;
+      top: 50%;
+      width: 90px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--yellow));
+      transform: rotate(-15deg);
+      transform-origin: right;
+    }
+
+    @keyframes planeFloat {
+      0%,
+      100% {
+        transform: translateY(0) rotate(-5deg);
+      }
+
+      50% {
+        transform: translateY(-13px) rotate(4deg);
+      }
+    }
+
+    .crash-value {
+      position: relative;
+      z-index: 3;
+      color: var(--yellow);
+      font-size: clamp(55px, 12vw, 100px);
+      font-weight: 900;
+      letter-spacing: -5px;
+      text-shadow:
+        0 0 12px rgba(255, 212, 0, 0.5),
+        0 0 40px rgba(255, 212, 0, 0.25);
+    }
+
+    .crash-value.crashed {
+      color: var(--red);
+      text-shadow: 0 0 25px rgba(255, 79, 94, 0.5);
+    }
+
+    .aviator-message {
+      margin-top: 15px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 11px 17px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      font-weight: 800;
+      transition: 0.2s ease;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .btn-primary {
+      color: var(--black);
+      background: var(--yellow);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #ffe45e;
+      transform: translateY(-1px);
+    }
+
+    .btn-blue {
+      color: var(--white);
+      background: var(--blue);
+    }
+
+    .btn-blue:hover:not(:disabled) {
+      background: #3ca2ff;
+    }
+
+    .btn-dark {
+      color: var(--white);
+      border-color: #3b3b3b;
+      background: #242424;
+    }
+
+    .btn-dark:hover:not(:disabled) {
+      border-color: var(--yellow);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .stat {
+      padding: 14px 10px;
+      border: 1px solid #292929;
+      border-radius: 13px;
+      background: #111;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--yellow);
+      font-size: 20px;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .input-group label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 45px;
+      padding: 11px 13px;
+      border: 1px solid #3b3b3b;
+      border-radius: 11px;
+      outline: none;
+      color: var(--white);
+      background: #0c0c0c;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 0 3px rgba(255, 212, 0, 0.08);
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .search-row.three {
+      grid-template-columns: 1fr 1fr auto;
+    }
+
+    .info-box {
+      margin-top: 15px;
+      padding: 13px;
+      border-left: 3px solid var(--blue);
+      border-radius: 8px;
+      color: var(--muted);
+      background: rgba(22, 140, 255, 0.08);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .info-box strong {
+      color: var(--blue);
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .match {
+      padding: 15px;
+      border: 1px solid #2d2d2d;
+      border-radius: 14px;
+      background: #101010;
+    }
+
+    .match-top,
+    .match-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .match-top {
+      margin-bottom: 14px;
+    }
+
+    .league {
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .match-status {
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .teams {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .team {
+      color: var(--white);
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .team:last-child {
+      text-align: right;
+    }
+
+    .score {
+      min-width: 70px;
+      color: var(--yellow);
+      font-size: 20px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .match-bottom {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #292929;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .player {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px;
+      border: 1px solid #2d2d2d;
+      border-radius: 13px;
+      background: #101010;
+    }
+
+    .player-avatar {
+      display: grid;
+      place-items: center;
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      color: var(--black);
+      background: linear-gradient(135deg, var(--yellow), var(--blue));
+      font-weight: 900;
+    }
+
+    .player-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .player-info strong {
+      display: block;
+      overflow: hidden;
+      color: var(--white);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .player-info span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .standings-table {
+      width: 100%;
+      min-width: 550px;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .standings-table th,
+    .standings-table td {
+      padding: 12px 9px;
+      border-bottom: 1px solid #2b2b2b;
+      text-align: left;
+    }
+
+    .standings-table th {
+      color: var(--yellow);
+      background: #111;
+    }
+
+    .standings-table td {
+      color: var(--muted);
+    }
+
+    .standings-table td:first-child,
+    .standings-table td:nth-child(2) {
+      color: var(--white);
+      font-weight: bold;
+    }
+
+    .loading,
+    .empty,
+    .error {
+      padding: 25px 15px;
+      border: 1px dashed #3a3a3a;
+      border-radius: 13px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .error {
+      border-color: rgba(255, 79, 94, 0.5);
+      color: #ff9da6;
+      background: rgba(255, 79, 94, 0.06);
+    }
+
+    .spinner {
+      width: 25px;
+      height: 25px;
+      margin: 0 auto 10px;
+      border: 3px solid #333;
+      border-top-color: var(--yellow);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .api-note {
+      margin-top: 18px;
+      color: #777;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .api-note strong {
+      color: var(--yellow);
+    }
+
+    .footer {
+      padding: 25px 0 10px;
+      color: #666;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .footer strong {
+      color: var(--yellow);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 12px;
+      }
+
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 16px;
+      }
+
+      .status-badge {
+        align-self: flex-start;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card.full {
+        grid-column: auto;
+      }
+
+      .form-grid,
+      .search-row,
+      .search-row.three {
+        grid-template-columns: 1fr;
+      }
+
+      .aviator-stage {
+        min-height: 280px;
+      }
+
+      .aviator-plane {
+        left: 7%;
+        bottom: 20%;
+        font-size: 36px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .teams {
+        grid-template-columns: 1fr;
+        gap: 7px;
+        text-align: center;
+      }
+
+      .team,
+      .team:last-child {
+        text-align: center;
+      }
+
+      .score {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-logo">S</div>
+
+        <div>
+          <h1>Sancho Tech</h1>
+          <p>Aviator Predictor & Football Intelligence</p>
+        </div>
+      </div>
+
+      <div class="status-badge">
+        ● SYSTEM ONLINE
+      </div>
+    </header>
+
+    <!-- NAVIGATION -->
+    <nav class="tabs" aria-label="Dashboard navigation">
+      <button class="tab active" data-tab="aviatorPanel">
+        ✈️ Aviator
+      </button>
+
+      <button class="tab" data-tab="scoresPanel">
+        ⚽ Live Scores
+      </button>
+
+      <button class="tab" data-tab="footballPanel">
+        🏆 Football Hub
+      </button>
+
+      <button class="tab" data-tab="h2hPanel">
+        🔁 H2H
+      </button>
+    </nav>
+
+    <!-- =========================
+         AVIATOR PANEL
+    ========================== -->
+    <section class="panel active" id="aviatorPanel">
+      <div class="grid">
+
+        <div class="card full">
+          <div class="card-title">
+            <h2>✈️ Aviator Crash Predictor</h2>
+            <small>SIMULATION MODE</small>
+          </div>
+
+          <div class="aviator-stage">
+            <div class="aviator-plane" id="aviatorPlane">✈️</div>
+            <div class="crash-value" id="crashValue">1.00x</div>
+          </div>
+
+          <div class="aviator-message" id="aviatorMessage">
+            Ready to generate a simulated crash point.
+          </div>
+
+          <div class="controls">
+            <button class="btn btn-primary" id="generateBtn">
+              🚀 Generate Crash Point
+            </button>
+
+            <button class="btn btn-blue" id="autoBtn">
+              ▶ Start Auto Mode
+            </button>
+
+            <button class="btn btn-dark" id="resetBtn">
+              Reset
+            </button>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <strong id="roundCount">0</strong>
+              <span>Rounds Generated</span>
+            </div>
+
+            <div class="stat">
+              <strong id="highestPoint">0.00x</strong>
+              <span>Highest Point</span>
+            </div>
+
+            <div class="stat">
+              <strong id="averagePoint">0.00x</strong>
+              <span>Average Point</span>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <strong>Notice:</strong>
+            This is a random simulation for entertainment and testing.
+            It does not predict real betting outcomes and does not guarantee
+            winnings.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================
+         LIVE SCORES PANEL
+    ========================== -->
+    <section class="panel" id="scoresPanel">
+      <div class="grid">
+
+        <div class="card full">
+          <div class="card-title">
+            <h2>⚽ Live Football Scores</h2>
+            <small>THESPORTSDB</small>
+          </div>
+
+          <div class="controls">
+            <button class="btn btn-primary" id="loadScoresBtn">
+              🔄 Refresh Scores
+            </button>
+
+            <span
+              id="scoresUpdated"
+              style="align-self:center;color:var(--muted);font-size:12px;"
+            >
+              Not loaded yet
+            </span>
+          </div>
+
+          <div id="scoresList" class="list" style="margin-top:16px;">
+            <div class="empty">
+              Click “Refresh Scores” to load football matches.
+            </div>
+          </div>
+
+          <div class="api-note">
+            Live scores are loaded from the configured football API.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================
+         FOOTBALL HUB PANEL
+    ========================== -->
+    <section class="panel" id="footballPanel">
+      <div class="grid">
+
+        <!-- PLAYER SEARCH -->
+        <div class="card">
+          <div class="card-title">
+            <h3>👤 Player Search</h3>
+            <small>RAPIDAPI</small>
+          </div>
+
+          <div class="search-row">
+            <input
+              type="text"
+              id="playerSearchInput"
+              placeholder="Search player e.g. Messi"
+            />
+
+            <button class="btn btn-primary" id="searchPlayerBtn">
+              Search
+            </button>
+          </div>
+
+          <div id="playersList" class="list">
+            <div class="empty">
+              Search for a football player.
+            </div>
+          </div>
+        </div>
+
+        <!-- STANDINGS -->
+        <div class="card">
+          <div class="card-title">
+            <h3>🏆 League Standings</h3>
+            <small>API READY</small>
+          </div>
+
+          <div class="search-row">
+            <select id="leagueSelect">
+              <option value="">Select league</option>
+              <option value="premier-league">Premier League</option>
+              <option value="la-liga">La Liga</option>
+              <option value="serie-a">Serie A</option>
+              <option value="bundesliga">Bundesliga</option>
+              <option value="ligue-1">Ligue 1</option>
+            </select>
+
+            <button class="btn btn-blue" id="loadStandingsBtn">
+              Load
+            </button>
+          </div>
+
+          <div id="standingsList">
+            <div class="empty">
+              Select a league to view standings.
+            </div>
+          </div>
+
+          <div class="api-note">
+            Add your standings endpoint in the JavaScript configuration.
+          </div>
+        </div>
+
+        <!-- ODDS -->
+        <div class="card full">
+          <div class="card-title">
+            <h3>🎯 Match Odds</h3>
+            <small>API READY</small>
+          </div>
+
+          <div id="oddsList">
+            <div class="empty">
+              Match odds endpoint has not been configured yet.
+            </div>
+          </div>
+
+          <div class="api-note">
+            Odds are not generated by this page. Connect a valid odds
+            provider endpoint before using this section.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================
+         H2H PANEL
+    ========================== -->
+    <section class="panel" id="h2hPanel">
+      <div class="grid">
+
+        <div class="card full">
+          <div class="card-title">
+            <h2>🔁 Head-to-Head Matches</h2>
+            <small>SOFASCORE RAPIDAPI</small>
+          </div>
+
+          <p style="color:var(--muted);font-size:12px;line-height:1.6;">
+            Enter the SofaScore team IDs to view previous meetings between
+            two teams.
+          </p>
+
+          <div class="search-row three">
+            <input
+              type="number"
+              id="h2hTeam1"
+              placeholder="Home team ID"
+            />
+
+            <input
+              type="number"
+              id="h2hTeam2"
+              placeholder="Away team ID"
+            />
+
+            <button class="btn btn-primary" id="loadH2HBtn">
+              🔁 Load H2H
+            </button>
+          </div>
+
+          <div id="h2hList" class="list">
+            <div class="empty">
+              Enter two SofaScore team IDs to load previous meetings.
+            </div>
+          </div>
+
+          <div class="info-box">
+            <strong>Example:</strong>
+            SofaScore team pages commonly contain the team ID in the URL.
+            Confirm the correct ID and query parameter names in your
+            RapidAPI documentation.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <footer class="footer">
+      Developed by <strong>Sancho Tech</strong>
+    </footer>
+  </div>
+
+  <script>
+    /* =========================================
+       API CONFIGURATION
+    ========================================= */
+
+    /*
+      WARNING:
+      Do not expose real API keys in production frontend code.
+      Use a backend proxy or serverless function instead.
+    */
+
+    const RAPIDAPI_KEY = "YOUR_RAPIDAPI_KEY";
+
+    const PLAYER_API =
+      "https://free-api-live-football-data.p.rapidapi.com/football-players-search";
+
+    const PLAYER_API_HOST =
+      "free-api-live-football-data.p.rapidapi.com";
+
+    const SOFASCORE_API =
+      "https://sofascore.p.rapidapi.com/matches/get-h2h-events";
+
+    const SOFASCORE_HOST =
+      "sofascore.p.rapidapi.com";
+
+    /*
+      Existing free TheSportsDB endpoint.
+      Change the date when necessary.
+    */
+    const LIVE_SCORES_API =
+      "https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=2026-09-15&s=Soccer";
+
+    /*
+      Add your actual endpoints here when available.
+      These remain empty until you provide valid provider URLs.
+    */
+    const STANDINGS_API = "";
+    const ODDS_API = "";
+
+    /* =========================================
+       GENERAL HELPERS
+    ========================================= */
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getFirstValue(object, keys, fallback = "") {
+      for (const key of keys) {
+        if (
+          object &&
+          object[key] !== undefined &&
+          object[key] !== null &&
+          object[key] !== ""
+        ) {
+          return object[key];
+        }
+      }
+
+      return fallback;
+    }
+
+    function extractArray(data, possibleKeys = []) {
+      if (Array.isArray(data)) {
+        return data;
+      }
+
+      for (const key of possibleKeys) {
+        if (Array.isArray(data?.[key])) {
+          return data[key];
+        }
+      }
+
+      if (Array.isArray(data?.data)) {
+        return data.data;
+      }
+
+      if (Array.isArray(data?.result)) {
+        return data.result;
+      }
+
+      if (Array.isArray(data?.response)) {
+        return data.response;
+      }
+
+      return [];
+    }
+
+    async function fetchJSON(url, options = {}) {
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        throw new Error(
+          "Request failed with status " + response.status
+        );
+      }
+
+      return response.json();
+    }
+
+    function showLoading(element, message = "Loading...") {
+      element.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          ${escapeHTML(message)}
+        </div>
+      `;
+    }
+
+    function showError(element, message) {
+      element.innerHTML = `
+        <div class="error">
+          ⚠️ ${escapeHTML(message)}
+        </div>
+      `;
+    }
+
+    /* =========================================
+       TAB NAVIGATION
+    ========================================= */
+
+    const tabs = document.querySelectorAll(".tab");
+    const panels = document.querySelectorAll(".panel");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        const targetId = tab.dataset.tab;
+
+        tabs.forEach(item => {
+          item.classList.remove("active");
+        });
+
+        panels.forEach(panel => {
+          panel.classList.remove("active");
+        });
+
+        tab.classList.add("active");
+
+        const targetPanel = document.getElementById(targetId);
+
+        if (targetPanel) {
+          targetPanel.classList.add("active");
+        }
+      });
+    });
+
+    /* =========================================
+       AVIATOR SIMULATION
+    ========================================= */
+
+    const crashValue = document.getElementById("crashValue");
+    const crashMessage = document.getElementById("aviatorMessage");
+    const generateBtn = document.getElementById("generateBtn");
+    const autoBtn = document.getElementById("autoBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const roundCount = document.getElementById("roundCount");
+    const highestPoint = document.getElementById("highestPoint");
+    const averagePoint = document.getElementById("averagePoint");
+    const aviatorPlane = document.getElementById("aviatorPlane");
+
+    let generatedRounds = [];
+    let autoMode = false;
+    let autoTimer = null;
+
+    function generateCrashPoint() {
+      /*
+        This is only a random simulation.
+        It is not connected to a real betting game.
+      */
+      const random = Math.random();
+
+      let crashPoint;
+
+      if (random < 0.55) {
+        crashPoint = 1 + Math.random() * 1.5;
+      } else if (random < 0.85) {
+        crashPoint = 2.5 + Math.random() * 4;
+      } else if (random < 0.97) {
+        crashPoint = 6.5 + Math.random() * 12;
+      } else {
+        crashPoint = 18 + Math.random() * 40;
+      }
+
+      crashPoint = Number(crashPoint.toFixed(2));
+
+      generatedRounds.push(crashPoint);
+
+      if (generatedRounds.length > 100) {
+        generatedRounds.shift();
+      }
+
+      const highest = Math.max(...generatedRounds);
+      const average =
+        generatedRounds.reduce((sum, value) => sum + value, 0) /
+        generatedRounds.length;
+
+      crashValue.classList.remove("crashed");
+      aviatorPlane.style.animation = "none";
+
+      void aviatorPlane.offsetWidth;
+
+      aviatorPlane.style.animation = "planeFloat 2.8s ease-in-out infinite";
+
+      crashValue.textContent = "1.00x";
+      crashMessage.textContent = "Generating simulated crash point...";
+
+      let current = 1;
+      const duration = 1000;
+      const start = performance.now();
+
+      function animate(timestamp) {
+        const progress = Math.min(
+          (timestamp - start) / duration,
+          1
+        );
+
+        current = 1 + (crashPoint - 1) * progress;
+        crashValue.textContent = current.toFixed(2) + "x";
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          crashValue.textContent = crashPoint.toFixed(2) + "x";
+          crashValue.classList.add("crashed");
+
+          crashMessage.textContent =
+            "Simulated crash generated. This is not a real prediction.";
+
+          roundCount.textContent = generatedRounds.length;
+          highestPoint.textContent = highest.toFixed(2) + "x";
+          averagePoint.textContent = average.toFixed(2) + "x";
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function resetAviator() {
+      generatedRounds = [];
+      crashValue.textContent = "1.00x";
+      crashValue.classList.remove("crashed");
+      crashMessage.textContent =
+        "Ready to generate a simulated crash point.";
+
+      roundCount.textContent = "0";
+      highestPoint.textContent = "0.00x";
+      averagePoint.textContent = "0.00x";
+    }
+
+    function toggleAutoMode() {
+      autoMode = !autoMode;
+
+      if (autoMode) {
+        autoBtn.textContent = "⏸ Stop Auto Mode";
+        autoBtn.classList.remove("btn-blue");
+        autoBtn.classList.add("btn-primary");
+
+        generateCrashPoint();
+
+        autoTimer = setInterval(() => {
+          generateCrashPoint();
+        }, 5000);
+      } else {
+        autoBtn.textContent = "▶ Start Auto Mode";
+        autoBtn.classList.remove("btn-primary");
+        autoBtn.classList.add("btn-blue");
+
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+    }
+
+    generateBtn.addEventListener("click", generateCrashPoint);
+    resetBtn.addEventListener("click", resetAviator);
+    autoBtn.addEventListener("click", toggleAutoMode);
+
+    /* =========================================
+       LIVE SCORES
+    ========================================= */
+
+    const scoresList = document.getElementById("scoresList");
+    const loadScoresBtn = document.getElementById("loadScoresBtn");
+    const scoresUpdated = document.getElementById("scoresUpdated");
+
+    function renderLiveScores(events) {
+      if (!events.length) {
+        scoresList.innerHTML = `
+          <div class="empty">
+            No football matches found for this date.
+          </div>
+        `;
+        return;
+      }
+
+      scoresList.innerHTML = events.map(event => {
+        const home =
+          event.strHomeTeam ||
+          event.homeTeam?.name ||
+          "Home Team";
+
+        const away =
+          event.strAwayTeam ||
+          event.awayTeam?.name ||
+          "Away Team";
+
+        const homeScore =
+          event.intHomeScore ??
+          event.homeScore?.current ??
+          "-";
+
+        const awayScore =
+          event.intAwayScore ??
+          event.awayScore?.current ??
+          "-";
+
+        const league =
+          event.strLeague ||
+          event.tournament?.name ||
+          "Football";
+
+        const status =
+          event.strStatus ||
+          event.status?.description ||
+          event.status?.type ||
+          "Scheduled";
+
+        const date =
+          event.dateEvent ||
+          event.startTimestamp
+            ? new Date(
+                event.startTimestamp
+                  ? event.startTimestamp * 1000
+                  : event.dateEvent
+              ).toLocaleDateString()
+            : "--";
+
+        return `
+          <div class="match">
+            <div class="match-top">
+              <span class="league">
+                ${escapeHTML(league)}
+              </span>
+
+              <span class="match-status">
+                ${escapeHTML(status)}
+              </span>
+            </div>
+
+            <div class="teams">
+              <div class="team">
+                ${escapeHTML(home)}
+              </div>
+
+              <div class="score">
+                ${escapeHTML(homeScore)} -
+                ${escapeHTML(awayScore)}
+              </div>
+
+              <div class="team">
+                ${escapeHTML(away)}
+              </div>
+            </div>
+
+            <div class="match-bottom">
+              <span>Match date</span>
+              <span>${escapeHTML(date)}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadLiveScores() {
+      showLoading(scoresList, "Loading football scores...");
+
+      loadScoresBtn.disabled = true;
+      loadScoresBtn.textContent = "⏳ Loading...";
+
+      try {
+        const data = await fetchJSON(LIVE_SCORES_API);
+
+        const events = extractArray(data, [
+          "events",
+          "matches",
+          "results"
+        ]);
+
+        renderLiveScores(events);
+
+        scoresUpdated.textContent =
+          "Updated: " + new Date().toLocaleTimeString();
+      } catch (error) {
+        console.error("Live scores error:", error);
+
+        showError(
+          scoresList,
+          "Unable to load live scores. Check the API or try again later."
+        );
+
+        scoresUpdated.textContent = "Update failed";
+      }
+
+      loadScoresBtn.disabled = false;
+      loadScoresBtn.textContent = "🔄 Refresh Scores";
+    }
+
+    loadScoresBtn.addEventListener("click", loadLiveScores);
+
+    /* =========================================
+       PLAYER SEARCH
+    ========================================= */
+
+    const playerSearchInput =
+      document.getElementById("playerSearchInput");
+
+    const searchPlayerBtn =
+      document.getElementById("searchPlayerBtn");
+
+    const playersList =
+      document.getElementById("playersList");
+
+    function renderPlayers(players) {
+      if (!players.length) {
+        playersList.innerHTML = `
+          <div class="empty">
+            No players found.
+          </div>
+        `;
+        return;
+      }
+
+      playersList.innerHTML = players.map(player => {
+        const name =
+          player.name ||
+          player.playerName ||
+          player.fullName ||
+          player.displayName ||
+          "Unknown Player";
+
+        const team =
+          player.team?.name ||
+          player.teamName ||
+          player.club ||
+          player.clubName ||
+          "Team not available";
+
+        const position =
+          player.position ||
+          player.positionName ||
+          "Football player";
+
+        const initials = name
+          .split(" ")
+          .map(part => part[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+
+        return `
+          <div class="player">
+            <div class="player-avatar">
+              ${escapeHTML(initials)}
+            </div>
+
+            <div class="player-info">
+              <strong>${escapeHTML(name)}</strong>
+              <span>
+                ${escapeHTML(team)} · ${escapeHTML(position)}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function searchPlayers() {
+      const search =
+        playerSearchInput.value.trim();
+
+      if (!search) {
+        playersList.innerHTML = `
+          <div class="empty">
+            Enter a player name first.
+          </div>
+        `;
+        return;
+      }
+
+      showLoading(playersList, "Searching players...");
+
+      searchPlayerBtn.disabled = true;
+      searchPlayerBtn.textContent = "⏳ Searching...";
+
+      try {
+        const url =
+          PLAYER_API +
+          "?search=" +
+          encodeURIComponent(search);
+
+        const data = await fetchJSON(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "x-rapidapi-host": PLAYER_API_HOST,
+            "x-rapidapi-key": RAPIDAPI_KEY
+          }
+        });
+
+        console.log("Player API response:", data);
+
+        const players = extractArray(data, [
+          "players",
+          "results",
+          "data"
+        ]);
+
+        renderPlayers(players);
+      } catch (error) {
+        console.error("Player search error:", error);
+
+        showError(
+          playersList,
+          "Player search failed. Check your RapidAPI key and endpoint."
+        );
+      }
+
+      searchPlayerBtn.disabled = false;
+      searchPlayerBtn.textContent = "Search";
+    }
+
+    searchPlayerBtn.addEventListener("click", searchPlayers);
+
+    playerSearchInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        searchPlayers();
+      }
+    });
+
+    /* =========================================
+       STANDINGS
+    ========================================= */
+
+    const leagueSelect =
+      document.getElementById("leagueSelect");
+
+    const loadStandingsBtn =
+      document.getElementById("loadStandingsBtn");
+
+    const standingsList =
+      document.getElementById("standingsList");
+
+    function renderStandings(rows) {
+      if (!rows.length) {
+        standingsList.innerHTML = `
+          <div class="empty">
+            No standings data found.
+          </div>
+        `;
+        return;
+      }
+
+      standingsList.innerHTML = `
+        <div class="table-wrap">
+          <table class="standings-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Team</th>
+                <th>MP</th>
+                <th>W</th>
+                <th>D</th>
+                <th>L</th>
+                <th>Pts</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              ${rows.map((row, index) => {
+                const team =
+                  row.team?.name ||
+                  row.teamName ||
+                  row.name ||
+                  "Team";
+
+                const played =
+                  row.played ??
+                  row.matchesPlayed ??
+                  row.mp ??
+                  "-";
+
+                const wins =
+                  row.wins ??
+                  row.won ??
+                  row.w ??
+                  "-";
+
+                const draws =
+                  row.draws ??
+                  row.draw ??
+                  row.d ??
+                  "-";
+
+                const losses =
+                  row.losses ??
+                  row.lost ??
+                  row.l ??
+                  "-";
+
+                const points =
+                  row.points ??
+                  row.pts ??
+                  "-";
+
+                return `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${escapeHTML(team)}</td>
+                    <td>${escapeHTML(played)}</td>
+                    <td>${escapeHTML(wins)}</td>
+                    <td>${escapeHTML(draws)}</td>
+                    <td>${escapeHTML(losses)}</td>
+                    <td>${escapeHTML(points)}</td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function loadStandings() {
+      const league = leagueSelect.value;
+
+      if (!league) {
+        standingsList.innerHTML = `
+          <div class="empty">
+            Select a league first.
+          </div>
+        `;
+        return;
+      }
+
+      if (!STANDINGS_API) {
+        standingsList.innerHTML = `
+          <div class="empty">
+            Standings API is not configured yet.
+            Add your actual endpoint in the JavaScript section.
+          </div>
+        `;
+        return;
+      }
+
+      showLoading(standingsList, "Loading league standings...");
+
+      loadStandingsBtn.disabled = true;
+      loadStandingsBtn.textContent = "⏳ Loading...";
+
+      try {
+        const url =
+          STANDINGS_API +
+          "?league=" +
+          encodeURIComponent(league);
+
+        const data = await fetchJSON(url, {
+          headers: {
+            "Content-Type": "application/json",
+            "x-rapidapi-key": RAPIDAPI_KEY
+          }
+        });
+
+        const rows = extractArray(data, [
+          "standings",
+          "table",
+          "teams",
+          "results"
+        ]);
+
+        renderStandings(rows);
+      } catch (error) {
+        console.error("Standings error:", error);
+
+        showError(
+          standingsList,
+          "Unable to load standings."
+        );
+      }
+
+      loadStandingsBtn.disabled = false;
+      loadStandingsBtn.textContent = "Load";
+    }
+
+    loadStandingsBtn.addEventListener(
+      "click",
+      loadStandings
+    );
+
+    /* =========================================
+       ODDS
+    ========================================= */
+
+    const oddsList =
+      document.getElementById("oddsList");
+
+    function loadOdds() {
+      if (!ODDS_API) {
+        oddsList.innerHTML = `
+          <div class="empty">
+            Odds API is not configured.
+            Add a valid odds provider endpoint before using this section.
+          </div>
+        `;
+        return;
+      }
+
+      oddsList.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          Loading match odds...
+        </div>
+      `;
+
+      /*
+        Add your provider-specific odds request here.
+        Different APIs use different parameters and response formats.
+      */
+    }
+
+    loadOdds();
+
+    /* =========================================
+       SOFASCORE HEAD-TO-HEAD
+    ========================================= */
+
+    const h2hTeam1 =
+      document.getElementById("h2hTeam1");
+
+    const h2hTeam2 =
+      document.getElementById("h2hTeam2");
+
+    const h2hList =
+      document.getElementById("h2hList");
+
+    const loadH2HBtn =
+      document.getElementById("loadH2HBtn");
+
+    function renderH2HMatches(matches) {
+      if (!matches.length) {
+        h2hList.innerHTML = `
+          <div class="empty">
+            No head-to-head matches found.
+          </div>
+        `;
+        return;
+      }
+
+      h2hList.innerHTML = matches.map(match => {
+        const home =
+          match.homeTeam?.name ||
+          match.home_team?.name ||
+          match.homeTeamName ||
+          "Home Team";
+
+        const away =
+          match.awayTeam?.name ||
+          match.away_team?.name ||
+          match.awayTeamName ||
+          "Away Team";
+
+        const homeScore =
+          match.homeScore?.current ??
+          match.homeScore ??
+          match.home_score ??
+          "-";
+
+        const awayScore =
+          match.awayScore?.current ??
+          match.awayScore ??
+          match.away_score ??
+          "-";
+
+        const tournament =
+          match.tournament?.name ||
+          match.league?.name ||
+          "Football";
+
+        const timestamp =
+          match.startTimestamp ||
+          match.start_time ||
+          null;
+
+        let date = "--";
+
+        if (timestamp) {
+          const numericTimestamp = Number(timestamp);
+
+          date = new Date(
+            String(timestamp).length === 10
+              ? numericTimestamp * 1000
+              : numericTimestamp
+          ).toLocaleDateString();
+        } else if (match.dateEvent) {
+          date = new Date(
+            match.dateEvent
+          ).toLocaleDateString();
+        }
+
+        const status =
+          match.status?.type ||
+          match.status?.description ||
+          match.status ||
+          "Finished";
+
+        return `
+          <div class="match">
+            <div class="match-top">
+              <span class="league">
+                ${escapeHTML(tournament)}
+              </span>
+
+              <span class="match-status">
+                ${escapeHTML(status)}
+              </span>
+            </div>
+
+            <div class="teams">
+              <div class="team">
+                ${escapeHTML(home)}
+              </div>
+
+              <div class="score">
+                ${escapeHTML(homeScore)} -
+                ${escapeHTML(awayScore)}
+              </div>
+
+              <div class="team">
+                ${escapeHTML(away)}
+              </div>
+            </div>
+
+            <div class="match-bottom">
+              <span>Previous meeting</span>
+              <span>${escapeHTML(date)}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadH2H() {
+      const team1 = h2hTeam1.value.trim();
+      const team2 = h2hTeam2.value.trim();
+
+      if (!team1 || !team2) {
+        h2hList.innerHTML = `
+          <div class="empty">
+            ⚠️ Enter both SofaScore team IDs.
+          </div>
+        `;
+        return;
+      }
+
+      showLoading(
+        h2hList,
+        "Loading head-to-head matches..."
+      );
+
+      loadH2HBtn.disabled = true;
+      loadH2HBtn.textContent = "⏳ Loading...";
+
+      try {
+        /*
+          Confirm the exact parameter names in the
+          RapidAPI SofaScore documentation.
+
+          This implementation uses:
+          team1Id and team2Id
+        */
+
+        const url =
+          SOFASCORE_API +
+          "?team1Id=" +
+          encodeURIComponent(team1) +
+          "&team2Id=" +
+          encodeURIComponent(team2);
+
+        const data = await fetchJSON(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "x-rapidapi-host": SOFASCORE_HOST,
+            "x-rapidapi-key": RAPIDAPI_KEY
+          }
+        });
+
+        console.log("SofaScore H2H response:", data);
+
+        const matches = extractArray(data, [
+          "events",
+          "matches",
+          "games",
+          "h2h"
+        ]);
+
+        renderH2HMatches(matches);
+      } catch (error) {
+        console.error("H2H API error:", error);
+
+        showError(
+          h2hList,
+          "Unable to load H2H matches. Check the team IDs, API key and endpoint parameters."
+        );
+      }
+
+      loadH2HBtn.disabled = false;
+      loadH2HBtn.textContent = "🔁 Load H2H";
+    }
+
+    loadH2HBtn.addEventListener("click", loadH2H);
+
+    h2hTeam1.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        loadH2H();
+      }
+    });
+
+    h2hTeam2.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        loadH2H();
+      }
+    });
+
+    /* =========================================
+       AUTO REFRESH LIVE SCORES
+    ========================================= */
+
+    setInterval(() => {
+      const scoresPanel =
+        document.getElementById("scoresPanel");
+
+      if (
+        scoresPanel &&
+        scoresPanel.classList.contains("active")
+      ) {
+        loadLiveScores();
+      }
+    }, 60000);
+  </script>
+</body>
+</html>
